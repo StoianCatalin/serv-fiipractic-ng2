@@ -56,10 +56,12 @@ app.get('/', function (req, res) {
 });
 
 app.get('/events/all', function(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.json(events);
 });
 
 app.get('/events/:id', function(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
     if (events[req.params.id - 1])
         res.json(events[req.params.id - 1]);
     else
@@ -67,6 +69,7 @@ app.get('/events/:id', function(req, res) {
 });
 
 app.post('/events/insert', function(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
     var event = req.body;
     if (event.title && event.descriere && event.author && event.image && event.rating && event.locatie && event.date) {
         event.id = parseInt(events[events.length-1].id) + 1;
@@ -79,6 +82,7 @@ app.post('/events/insert', function(req, res) {
 });
 
 app.put('/events/edit/:id', function(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
     var event = req.body;
     if (events[req.params.id - 1]) {
         if (event.title && event.descriere && event.author && event.image && event.rating && event.locatie && event.date) {
@@ -94,6 +98,7 @@ app.put('/events/edit/:id', function(req, res) {
 });
 
 app.put('/events/upvote/:id', function(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
     if (events[req.params.id - 1]) {
         if (events[req.params.id - 1].rating < 5)
             events[req.params.id - 1].rating = events[req.params.id - 1].rating + 1;
@@ -105,6 +110,7 @@ app.put('/events/upvote/:id', function(req, res) {
 });
 
 app.put('/events/downvote/:id', function(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
     if (events[req.params.id - 1]) {
         if (events[req.params.id - 1].rating > 0)
             events[req.params.id - 1].rating = events[req.params.id - 1].rating - 1;
