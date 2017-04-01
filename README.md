@@ -6,6 +6,9 @@ POST http://localhost:3232/events/insert Insert event
 PUT http://localhost:3232/events/edit/[id] Update event  
 PUT http://localhost:3232/events/upvote/[id] Increase rating  
 PUT http://localhost:3232/events/downvote/[id] Decrease rating  
+POST http://localhost:3232/auth/login  Login endpoint, name: admin password: admin
 
-
+npm install
 Run command: node app.js
+
+
