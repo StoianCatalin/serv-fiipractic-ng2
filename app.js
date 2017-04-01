@@ -1,12 +1,14 @@
 var express = require('express');
 var app = express();
 var path = require('path');
+var cors = require('cors')
 var bodyParser = require('body-parser');
 var router = express().Router;
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(require('body-parser').urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cors());
 
 var events = [
         {
@@ -24,7 +26,7 @@ var events = [
             "title": "Planeta Venus la elongaţie estică maximă",
             "descriere" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam placerat est id vehicula dictum. Donec facilisis ex ac erat iaculis, nec porta sapien posuere. Nam et felis at metus aliquam ornare. Sed erat arcu, cursus in sem ut, convallis vestibulum velit. Nam viverra ultrices velit, nec porttitor metus porta a.",
             "author" : "Andrei",
-            "image" : "https://astrobarlad.files.wordpress.com/2015/07/leul.jpg",
+            "image" : "http://nineplanets.org/images/thesun.jpg",
             "rating": 3,
             "locatie" : "Australia",
             "date" : "12 ianuarie"
@@ -51,25 +53,31 @@ var events = [
         }
     ];
 
+var token = "ge3J2BxynNJGZluvgmCuH31m2P1LnaOWNClGlo1l6vB3zLpHM6yAZb4IXLCxMLto";
+
+var authMiddleware = function(req, res, next) {
+    var currentToken = req.get("Authorization");
+    if (currentToken == token)
+        next();
+    else res.sendStatus(403);
+};
+
 app.get('/', function (req, res) {
     res.sendfile('index.html');
 });
 
 app.get('/events/all', function(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
     res.json(events);
 });
 
 app.get('/events/:id', function(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
     if (events[req.params.id - 1])
         res.json(events[req.params.id - 1]);
     else
         res.sendStatus(404);
 });
 
-app.post('/events/insert', function(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+app.post('/events/insert', authMiddleware, function(req, res) {
     var event = req.body;
     if (event.title && event.descriere && event.author && event.image && event.rating && event.locatie && event.date) {
         event.id = parseInt(events[events.length-1].id) + 1;
@@ -81,8 +89,7 @@ app.post('/events/insert', function(req, res) {
     }
 });
 
-app.put('/events/edit/:id', function(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+app.post('/events/edit/:id', function(req, res) {
     var event = req.body;
     if (events[req.params.id - 1]) {
         if (event.title && event.descriere && event.author && event.image && event.rating && event.locatie && event.date) {
@@ -98,7 +105,6 @@ app.put('/events/edit/:id', function(req, res) {
 });
 
 app.put('/events/upvote/:id', function(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
     if (events[req.params.id - 1]) {
         if (events[req.params.id - 1].rating < 5)
             events[req.params.id - 1].rating = events[req.params.id - 1].rating + 1;
@@ -110,7 +116,6 @@ app.put('/events/upvote/:id', function(req, res) {
 });
 
 app.put('/events/downvote/:id', function(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
     if (events[req.params.id - 1]) {
         if (events[req.params.id - 1].rating > 0)
             events[req.params.id - 1].rating = events[req.params.id - 1].rating - 1;
@@ -119,6 +124,14 @@ app.put('/events/downvote/:id', function(req, res) {
     else {
         res.sendStatus(404);
     }
+});
+
+app.post('/auth/login', function(req, res) {
+    var user = {name: 'admin', password: 'admin'};
+    if (req.body.name == user.name && req.body.password == user.password) {
+        res.json({token: token});
+    }
+    else res.sendStatus(403);
 });
 
 app.use(function (err, req, res, next) {
